@@ -1,0 +1,13 @@
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headlines);
+  margin: 0 0 0.5em;
+  line-height: 1.25;
+}
+
+p {
+  margin: 0 0 1em;
+  line-height: 1.6;
+}
+
+.text-light { color: var(--text-light); }
+.text-dark { color: var(--text-main); }
