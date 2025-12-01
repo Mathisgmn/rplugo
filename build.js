@@ -1,4 +1,3 @@
-// build.js
 import fs from 'node:fs/promises';
 import postcss from 'postcss';
 import autoprefixer from 'autoprefixer';
@@ -10,16 +9,9 @@ const OUTPUT_DIR = './dist';
 const OUTPUT_FILE = `${OUTPUT_DIR}/plugo.css`;
 const OUTPUT_MIN_FILE = `${OUTPUT_DIR}/plugo.min.css`;
 
-/* ------------------------------------------------------------
- * Utils
- * ----------------------------------------------------------*/
-
 const LIGHT_FACTOR = 0.2;
 const DARK_FACTOR = -0.2;
 
-/**
- * Convert HEX (#rrggbb) -> { r,g,b }
- */
 function hexToRgb(hex) {
     const clean = hex.replace('#', '');
     const bigint = parseInt(clean, 16);
@@ -30,9 +22,6 @@ function hexToRgb(hex) {
     };
 }
 
-/**
- * Convert {r,g,b} -> HEX
- */
 function rgbToHex({ r, g, b }) {
     const toHex = (v) => {
         const h = v.toString(16);
@@ -41,11 +30,6 @@ function rgbToHex({ r, g, b }) {
     return '#' + toHex(r) + toHex(g) + toHex(b);
 }
 
-/**
- * Ajuste la luminosité d'une couleur.
- * percent > 0 → éclaircit, percent < 0 → assombrit
- * Ex: 0.2 = +20%, -0.2 = -20%
- */
 function adjustColorLuminance(hex, percent) {
     const { r, g, b } = hexToRgb(hex);
     const adjust = (c) => {
@@ -61,9 +45,6 @@ function adjustColorLuminance(hex, percent) {
     });
 }
 
-/**
- * Génère un bloc @media pour un breakpoint (sm, md, …)
- */
 function wrapWithBreakpoint(breakpointName, minWidth, content) {
     return `
 @media (min-width: ${minWidth}) {
@@ -72,14 +53,10 @@ ${content}
 `;
 }
 
-/* ------------------------------------------------------------
- * Génération du thème
- * ----------------------------------------------------------*/
-
 function generateColors(theme) {
     const { colors } = theme;
 
-    let css = `/* === Colors & CSS variables === */\n:root {\n`;
+    let css = `:root {\n`;
     for (const [name, value] of Object.entries(colors)) {
         const light = adjustColorLuminance(value, LIGHT_FACTOR);
         const dark = adjustColorLuminance(value, DARK_FACTOR);
@@ -90,9 +67,8 @@ function generateColors(theme) {
 
     css += `}\n\n`;
 
-    // Mode sombre optionnel
     if (config.darkMode) {
-        css += `/* Dark mode via [data-theme="dark"] */\n[data-theme="dark"] {\n`;
+        css += `[data-theme="dark"] {\n`;
         for (const [name, value] of Object.entries(colors)) {
             const darker = adjustColorLuminance(value, -0.35);
             const lighter = adjustColorLuminance(value, 0.1);
@@ -110,8 +86,7 @@ function generateTypography(theme) {
     const { typography, spacing } = theme;
     const lineHeightRatio = parseFloat(spacing.ratioLineHeight || '1.25');
 
-    return `/* === Typography === */
-:root {
+    return `:root {
   --font-main: ${typography.main};
   --font-headlines: ${typography.headlines};
   --line-height-ratio: ${lineHeightRatio};
@@ -130,7 +105,6 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0 0 0.5em 0;
 }
 
-/* Exemple de tailles basiques */
 h1 { font-size: 2.5rem; }
 h2 { font-size: 2rem; }
 h3 { font-size: 1.75rem; }
@@ -150,13 +124,11 @@ function generateLayout(theme) {
     const cols = layout.cols;
     const breakpoints = layout.breakpoints;
 
-    let css = `/* === Layout & Grid === */
-:root {
+    let css = `:root {
   --container-max-width: ${layout.container};
   --grid-columns: ${cols};
 }
 
-/* Container centré */
 .container {
   width: 100%;
   max-width: var(--container-max-width);
@@ -166,16 +138,13 @@ function generateLayout(theme) {
   padding-right: 1rem;
 }
 
-/* Ligne de grille */
 .row {
   display: flex;
   flex-wrap: wrap;
 }
 
-/* Colonnes de base (mobile) */
 `;
 
-    // Colonnes .col-1 ... .col-N
     for (let i = 1; i <= cols; i++) {
         const percent = (i / cols) * 100;
         css += `.col-${i} {
@@ -184,7 +153,6 @@ function generateLayout(theme) {
 }\n`;
     }
 
-    // Variantes responsives .md:col-6, etc
     for (const [bpName, minWidth] of Object.entries(breakpoints)) {
         let inner = '';
         for (let i = 1; i <= cols; i++) {
@@ -214,8 +182,7 @@ function generateSpacing(theme) {
         5: 2
     };
 
-    let css = `/* === Spacing === */
-:root {
+    let css = `:root {
   --spacing-base: ${baseUnit};
 `;
 
@@ -224,7 +191,6 @@ function generateSpacing(theme) {
     }
     css += `}\n\n`;
 
-    // Classes .m-1, .mt-1, .mb-1, .mx-1, .my-1, .p-1, etc.
     const props = [
         ['m', ['margin']],
         ['mt', ['margin-top']],
@@ -266,15 +232,10 @@ function generateSpacing(theme) {
     return css + '\n';
 }
 
-/* ------------------------------------------------------------
- * Utilities
- * ----------------------------------------------------------*/
-
 function generateUtilityFlex(theme) {
     const breakpoints = theme.layout.breakpoints;
 
-    let css = `/* === Utility: Flex === */ 
-.flex { display: flex; }
+    let css = `.flex { display: flex; }
 .inline-flex { display: inline-flex; }
 
 .flex-row { flex-direction: row; }
@@ -293,7 +254,6 @@ function generateUtilityFlex(theme) {
 .flex-nowrap { flex-wrap: nowrap; }
 \n`;
 
-    // Variantes responsives .md:flex, etc.
     const baseClasses = [
         'flex',
         'inline-flex',
@@ -357,7 +317,7 @@ function getUtilityFlexRuleForClass(cls) {
 function generateUtilityColor(theme) {
     const { colors } = theme;
 
-    let css = `/* === Utility: Colors (text & background) === */\n`;
+    let css = ``;
 
     for (const name of Object.keys(colors)) {
         css += `.text-${name} { color: var(--color-${name}); }\n`;
@@ -377,8 +337,7 @@ function generateUtilitySpacing(theme) {
 }
 
 function generateUtilityImage() {
-    return `/* === Utility: Image === */
-.img-responsive {
+    return `.img-responsive {
   max-width: 100%;
   height: auto;
   display: block;
@@ -399,14 +358,9 @@ function generateUtilityImage() {
 `;
 }
 
-/* ------------------------------------------------------------
- * Components
- * ----------------------------------------------------------*/
-
 function generateComponentButton(theme) {
     const { transition } = theme;
-    return `/* === Component: Button === */
-:root {
+    return `:root {
   --btn-radius: 9999px;
   --btn-padding-y: 0.5rem;
   --btn-padding-x: 1rem;
@@ -434,7 +388,6 @@ function generateComponentButton(theme) {
   cursor: not-allowed;
 }
 
-/* Variantes colorées */
 .btn-primary {
   background-color: var(--color-primary);
   color: #fff;
@@ -472,8 +425,7 @@ function generateComponentButton(theme) {
 }
 
 function generateComponentCard(theme) {
-    return `/* === Component: Card === */
-.card {
+    return `.card {
   background-color: #ffffff;
   border-radius: 0.75rem;
   padding: 1.25rem;
@@ -495,8 +447,7 @@ function generateComponentCard(theme) {
 }
 
 function generateComponentAlert(theme) {
-    return `/* === Component: Alert === */
-.alert {
+    return `.alert {
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
   display: flex;
@@ -528,25 +479,15 @@ function generateComponentAlert(theme) {
 `;
 }
 
-/* ------------------------------------------------------------
- * Build principal
- * ----------------------------------------------------------*/
-
 function generateCSS(config) {
     const theme = config.theme;
 
-    let css = `/* ==========================================================
- * Plugo CSS Framework
- * Fichier généré automatiquement - ne pas modifier à la main.
- * ========================================================== */
-`;
+    let css = ``;
 
-    // Thème global
     css += generateColors(theme);
     css += generateTypography(theme);
     css += generateLayout(theme);
 
-    // Components
     if (config.components.includes('button')) {
         css += generateComponentButton(theme);
     }
@@ -557,7 +498,6 @@ function generateCSS(config) {
         css += generateComponentAlert(theme);
     }
 
-    // Utilities
     if (config.utilities.includes('flex')) {
         css += generateUtilityFlex(theme);
     }
@@ -574,17 +514,10 @@ function generateCSS(config) {
     return css;
 }
 
-/**
- * Très basique : compte les classes via regex `.nom {`
- */
 function countClasses(css) {
     const matches = css.match(/\.[a-zA-Z0-9\\:_-]+\s*\{/g) || [];
     return matches.length;
 }
-
-/* ------------------------------------------------------------
- * Pipeline PostCSS + écriture fichiers + rapport
- * ----------------------------------------------------------*/
 
 async function runBuild() {
     try {
@@ -592,14 +525,12 @@ async function runBuild() {
 
         const rawCss = generateCSS(config);
 
-        // CSS avec autoprefixer (non minifié)
         const prefixed = await postcss([autoprefixer]).process(rawCss, {
             from: undefined
         });
 
         await fs.writeFile(OUTPUT_FILE, prefixed.css, 'utf8');
 
-        // CSS minifié (autoprefixer + cssnano)
         const minified = await postcss([
             autoprefixer,
             cssnano({ preset: 'default' })
@@ -609,7 +540,6 @@ async function runBuild() {
 
         await fs.writeFile(OUTPUT_MIN_FILE, minified.css, 'utf8');
 
-        // Rapport de build (bonus)
         const totalClasses = countClasses(prefixed.css);
         const sizePretty = (bytes) =>
             (bytes / 1024).toFixed(2) + ' kB';
