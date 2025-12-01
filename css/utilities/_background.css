@@ -1,5 +1,0 @@
-body.dark .bg-dark {
-  color: var(--text-light);
-}
-
-.bg-dark { color: var(--text-light); }
