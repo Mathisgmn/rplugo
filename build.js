@@ -12,6 +12,7 @@ import { generateComponentButton } from './src/generators/components/button.js';
 import { generateComponentCard } from './src/generators/components/card.js';
 import { generateComponentAlert } from './src/generators/components/alert.js';
 import { generateUtilityFlex } from './src/generators/utilities/flex.js';
+import { generateUtilityGrid } from './src/generators/utilities/grid.js';
 import { generateUtilityColor } from './src/generators/utilities/color.js';
 import { generateUtilitySpacing } from './src/generators/utilities/spacing.js';
 import { generateUtilityImage } from './src/generators/utilities/image.js';
@@ -49,6 +50,9 @@ function generateCSS(currentConfig) {
     // Utilities
     if (currentConfig.utilities.includes('flex')) {
         css += generateUtilityFlex(theme);
+    }
+    if (currentConfig.utilities.includes('grid')) {
+        css += generateUtilityGrid(theme);
     }
     if (currentConfig.utilities.includes('color')) {
         css += generateUtilityColor(theme);

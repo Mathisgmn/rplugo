@@ -31,7 +31,7 @@ const config = {
         }
     },
     components: ['button', 'card', 'alert'],
-    utilities: ['flex', 'spacing', 'color', 'image']
+    utilities: ['flex', 'grid', 'spacing', 'color', 'image']
 };
 
 export default config;
