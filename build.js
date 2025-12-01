@@ -79,7 +79,8 @@ ${content}
 function generateColors(theme) {
     const { colors } = theme;
 
-    let css = `/* === Colors & CSS variables === */\n:root {\n`;
+    let css = `/* === Colors & CSS variables === */\n`;
+    css += `/* Variables principales, utilisées partout dans le thème */\n:root {\n`;
     for (const [name, value] of Object.entries(colors)) {
         const light = adjustColorLuminance(value, LIGHT_FACTOR);
         const dark = adjustColorLuminance(value, DARK_FACTOR);
@@ -92,7 +93,7 @@ function generateColors(theme) {
 
     // Mode sombre optionnel
     if (config.darkMode) {
-        css += `/* Dark mode via [data-theme="dark"] */\n[data-theme="dark"] {\n`;
+        css += `/* Palette ajustée quand [data-theme="dark"] est présent */\n[data-theme="dark"] {\n`;
         for (const [name, value] of Object.entries(colors)) {
             const darker = adjustColorLuminance(value, -0.35);
             const lighter = adjustColorLuminance(value, 0.1);
@@ -111,12 +112,14 @@ function generateTypography(theme) {
     const lineHeightRatio = parseFloat(spacing.ratioLineHeight || '1.25');
 
     return `/* === Typography === */
+/* Polices et hauteurs de ligne pour tout le document */
 :root {
   --font-main: ${typography.main};
   --font-headlines: ${typography.headlines};
   --line-height-ratio: ${lineHeightRatio};
 }
 
+/* Reset léger pour partir d'une base propre */
 html, body {
   margin: 0;
   padding: 0;
@@ -124,6 +127,7 @@ html, body {
   line-height: var(--line-height-ratio);
 }
 
+/* Les titres restent cohérents quelle que soit la police */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-headlines);
   line-height: var(--line-height-ratio);
@@ -138,6 +142,7 @@ h4 { font-size: 1.5rem; }
 h5 { font-size: 1.25rem; }
 h6 { font-size: 1rem; }
 
+/* Paragraphe avec marge par défaut, facile à surcharger */
 p {
   margin: 0 0 1em 0;
 }
@@ -151,6 +156,7 @@ function generateLayout(theme) {
     const breakpoints = layout.breakpoints;
 
     let css = `/* === Layout & Grid === */
+/* Variables partagées par le système de grille */
 :root {
   --container-max-width: ${layout.container};
   --grid-columns: ${cols};
@@ -215,6 +221,7 @@ function generateSpacing(theme) {
     };
 
     let css = `/* === Spacing === */
+/* Échelle d'espacement dérivée de l'unité de base */
 :root {
   --spacing-base: ${baseUnit};
 `;
@@ -273,22 +280,27 @@ function generateSpacing(theme) {
 function generateUtilityFlex(theme) {
     const breakpoints = theme.layout.breakpoints;
 
-    let css = `/* === Utility: Flex === */ 
+    let css = `/* === Utility: Flex === */
+/* Bloc de base pour aligner rapidement les éléments */
 .flex { display: flex; }
 .inline-flex { display: inline-flex; }
 
+/* Sens de la ligne */
 .flex-row { flex-direction: row; }
 .flex-col { flex-direction: column; }
 
+/* Alignement vertical */
 .items-start { align-items: flex-start; }
 .items-center { align-items: center; }
 .items-end { align-items: flex-end; }
 
+/* Répartition horizontale */
 .justify-start { justify-content: flex-start; }
 .justify-center { justify-content: center; }
 .justify-between { justify-content: space-between; }
 .justify-end { justify-content: flex-end; }
 
+/* Gestion du retour à la ligne */
 .flex-wrap { flex-wrap: wrap; }
 .flex-nowrap { flex-wrap: nowrap; }
 \n`;
@@ -358,6 +370,7 @@ function generateUtilityColor(theme) {
     const { colors } = theme;
 
     let css = `/* === Utility: Colors (text & background) === */\n`;
+    css += `/* Couleurs de texte et fonds synchronisés avec les variables */\n`;
 
     for (const name of Object.keys(colors)) {
         css += `.text-${name} { color: var(--color-${name}); }\n`;
@@ -378,18 +391,21 @@ function generateUtilitySpacing(theme) {
 
 function generateUtilityImage() {
     return `/* === Utility: Image === */
+/* Helpers pour conserver les proportions des visuels */
 .img-responsive {
   max-width: 100%;
   height: auto;
   display: block;
 }
 
+/* Couvre le conteneur sans déformer l'image */
 .img-cover {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
+/* S'assure que l'image reste entière */
 .img-contain {
   width: 100%;
   height: 100%;
@@ -406,6 +422,7 @@ function generateUtilityImage() {
 function generateComponentButton(theme) {
     const { transition } = theme;
     return `/* === Component: Button === */
+/* Variables communes à toutes les variantes */
 :root {
   --btn-radius: 9999px;
   --btn-padding-y: 0.5rem;
@@ -414,6 +431,7 @@ function generateComponentButton(theme) {
   --transition-type: ${transition.type};
 }
 
+/* Bouton générique pour la base visuelle */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -473,6 +491,7 @@ function generateComponentButton(theme) {
 
 function generateComponentCard(theme) {
     return `/* === Component: Card === */
+/* Bloc simple pour encadrer du contenu */
 .card {
   background-color: #ffffff;
   border-radius: 0.75rem;
@@ -496,6 +515,7 @@ function generateComponentCard(theme) {
 
 function generateComponentAlert(theme) {
     return `/* === Component: Alert === */
+/* Bandeaux discrets pour signaler un statut */
 .alert {
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
